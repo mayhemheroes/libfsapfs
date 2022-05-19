@@ -1,0 +1,7 @@
+project: rnshah9/libfsapfs
+target: libfsapfs
+tests:
+  - file://tests/data
+
+cmds:
+  - cmd: /usr/local/bin/fsapfsinfo @@
