@@ -1,5 +1,5 @@
 project: rnshah9/libfsapfs
-target: libfsapfs
+target: fsapfsinfo
 tests:
   - file://tests/data
 
