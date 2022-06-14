@@ -1,6 +1,6 @@
-project: rnshah9/libfsapfs
+project: libfsapfs
 target: fsapfsinfo
-tests:
+testsuite:
   - file://tests/data
 
 cmds:
