@@ -4,4 +4,4 @@ testsuite:
   - file://tests/data
 
 cmds:
-  - cmd: /usr/local/bin/fsapfsinfo @@
+  - cmd: /install/bin/fsapfsinfo @@
