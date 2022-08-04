@@ -38,6 +38,7 @@
 #include "fsapfstools_libfsapfs.h"
 #include "fsapfstools_libhmac.h"
 #include "fsapfstools_libuna.h"
+#include "fsapfstools_unused.h"
 #include "info_handle.h"
 
 #if !defined( LIBFSAPFS_HAVE_BFIO )
@@ -1711,9 +1712,11 @@ void info_handle_incompatible_features_flags_fprint(
 /* Prints the read-only compatible features flags to the notify stream
  */
 void info_handle_read_only_compatible_features_flags_fprint(
-      uint64_t read_only_compatible_features_flags,
+      uint64_t read_only_compatible_features_flags FSAPFSTOOLS_ATTRIBUTE_UNUSED,
       FILE *notify_stream )
 {
+	FSAPFSTOOLS_UNREFERENCED_PARAMETER( read_only_compatible_features_flags )
+
 	/* Currently there are no container read-only compatible feature flags defined */
 
 	fprintf(
@@ -1882,6 +1885,9 @@ int info_handle_file_entry_value_with_name_fprint(
 	int64_t inode_change_time                          = 0;
 	int64_t modification_time                          = 0;
 	uint32_t group_identifier                          = 0;
+	uint32_t major_device_number                       = 0;
+	uint32_t minor_device_number                       = 0;
+	uint32_t number_of_links                           = 0;
 	uint32_t owner_identifier                          = 0;
 	uint16_t file_mode                                 = 0;
 	int extended_attribute_index                       = 0;
@@ -2397,6 +2403,25 @@ int info_handle_file_entry_value_with_name_fprint(
 				goto on_error;
 			}
 		}
+		if( libfsapfs_file_entry_get_number_of_links(
+		     file_entry,
+		     &number_of_links,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve number of links.",
+			 function );
+
+			goto on_error;
+		}
+		fprintf(
+		 info_handle->notify_stream,
+		 "\tNumber of links\t\t: %" PRIu32 "\n",
+		 number_of_links );
+
 		fprintf(
 		 info_handle->notify_stream,
 		 "\tOwner identifier\t: %" PRIu32 "\n",
@@ -2413,6 +2438,31 @@ int info_handle_file_entry_value_with_name_fprint(
 		 file_mode_string,
 		 file_mode );
 
+		result = libfsapfs_file_entry_get_device_number(
+		          file_entry,
+		          &major_device_number,
+		          &minor_device_number,
+		          error );
+
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve device number.",
+			 function );
+
+			goto on_error;
+		}
+		else if( result != 0 )
+		{
+			fprintf(
+			 info_handle->notify_stream,
+			 "\tDevice number\t\t: %" PRIu32 ",%" PRIu32 "\n",
+			 major_device_number,
+			 minor_device_number );
+		}
 		if( symbolic_link_target != NULL )
 		{
 			fprintf(

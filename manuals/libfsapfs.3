@@ -1,4 +1,4 @@
-.Dd April 26, 2022
+.Dd July 28, 2022
 .Dt libfsapfs 3
 .Os libfsapfs
 .Sh NAME
@@ -115,11 +115,11 @@ Volume functions
 .Ft int
 .Fn libfsapfs_volume_set_utf16_recovery_password "libfsapfs_volume_t *volume" "const uint16_t *utf16_string" "size_t utf16_string_length" "libfsapfs_error_t **error"
 .Ft int
+.Fn libfsapfs_volume_get_root_directory "libfsapfs_volume_t *volume" "libfsapfs_file_entry_t **file_entry" "libfsapfs_error_t **error"
+.Ft int
 .Fn libfsapfs_volume_get_next_file_entry_identifier "libfsapfs_volume_t *volume" "uint64_t *identifier" "libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_volume_get_file_entry_by_identifier "libfsapfs_volume_t *volume" "uint64_t identifier" "libfsapfs_file_entry_t **file_entry" "libfsapfs_error_t **error"
-.Ft int
-.Fn libfsapfs_volume_get_root_directory "libfsapfs_volume_t *volume" "libfsapfs_file_entry_t **file_entry" "libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_volume_get_file_entry_by_utf8_path "libfsapfs_volume_t *volume" "const uint8_t *utf8_string" "size_t utf8_string_length" "libfsapfs_file_entry_t **file_entry" "libfsapfs_error_t **error"
 .Ft int
@@ -165,7 +165,13 @@ File entry functions
 .Ft int
 .Fn libfsapfs_file_entry_get_group_identifier "libfsapfs_file_entry_t *file_entry" "uint32_t *group_identifier" "libfsapfs_error_t **error"
 .Ft int
+.Fn libfsapfs_file_entry_get_device_identifier "libfsapfs_file_entry_t *file_entry" "uint32_t *device_identifier" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_device_number "libfsapfs_file_entry_t *file_entry" "uint32_t *major_device_number" "uint32_t *minor_device_number" "libfsapfs_error_t **error"
+.Ft int
 .Fn libfsapfs_file_entry_get_file_mode "libfsapfs_file_entry_t *file_entry" "uint16_t *file_mode" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_number_of_links "libfsapfs_file_entry_t *file_entry" "uint32_t *number_of_links" "libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_file_entry_get_utf8_name_size "libfsapfs_file_entry_t *file_entry" "size_t *utf8_string_size" "libfsapfs_error_t **error"
 .Ft int

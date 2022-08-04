@@ -198,9 +198,28 @@ int libfsapfs_file_entry_get_group_identifier(
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_device_identifier(
+     libfsapfs_file_entry_t *file_entry,
+     uint32_t *device_identifier,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_device_number(
+     libfsapfs_file_entry_t *file_entry,
+     uint32_t *major_device_number,
+     uint32_t *minor_device_number,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
 int libfsapfs_file_entry_get_file_mode(
      libfsapfs_file_entry_t *file_entry,
      uint16_t *file_mode,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_number_of_links(
+     libfsapfs_file_entry_t *file_entry,
+     uint32_t *number_of_links,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \

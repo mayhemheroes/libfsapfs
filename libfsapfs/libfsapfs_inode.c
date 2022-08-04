@@ -25,6 +25,7 @@
 #include <types.h>
 
 #include "libfsapfs_debug.h"
+#include "libfsapfs_definitions.h"
 #include "libfsapfs_inode.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
@@ -332,6 +333,10 @@ int libfsapfs_inode_read_value_data(
 	 inode->flags );
 
 	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsapfs_file_system_btree_value_inode_t *) data )->number_of_links,
+	 inode->number_of_links );
+
+	byte_stream_copy_to_uint32_little_endian(
 	 ( (fsapfs_file_system_btree_value_inode_t *) data )->owner_identifier,
 	 inode->owner_identifier );
 
@@ -441,14 +446,20 @@ int libfsapfs_inode_read_value_data(
 		libcnotify_printf(
 		 "\n" );
 
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_file_system_btree_value_inode_t *) data )->number_of_children,
-		 value_32bit );
-		libcnotify_printf(
-		 "%s: number of children\t\t\t: %" PRIu32 "\n",
-		 function,
-		 value_32bit );
-
+		if( ( inode->file_mode & 0xf000 ) == LIBFSAPFS_FILE_TYPE_DIRECTORY )
+		{
+			libcnotify_printf(
+			 "%s: number of children\t\t\t: %" PRIu32 "\n",
+			 function,
+			 inode->number_of_links );
+		}
+		else
+		{
+			libcnotify_printf(
+			 "%s: number of links\t\t\t: %" PRIu32 "\n",
+			 function,
+			 inode->number_of_links );
+		}
 		byte_stream_copy_to_uint32_little_endian(
 		 ( (fsapfs_file_system_btree_value_inode_t *) data )->unknown1,
 		 value_32bit );
@@ -647,7 +658,6 @@ int libfsapfs_inode_read_value_data(
 				case 10:
 				case 11:
 				case 13:
-				case 14:
 				case 15:
 					break;
 
@@ -761,6 +771,36 @@ int libfsapfs_inode_read_value_data(
 						 "%s: number of bytes read\t\t\t: %" PRIu64 "\n",
 						 function,
 						 value_64bit );
+
+						libcnotify_printf(
+						 "\n" );
+					}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+					break;
+
+				case 14:
+					if( value_data_size != 4 )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+						 "%s: invalid value data size value out of bounds.",
+						 function );
+
+						goto on_error;
+					}
+					byte_stream_copy_to_uint32_little_endian(
+					 value_data,
+					 inode->device_identifier );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+					if( libcnotify_verbose != 0 )
+					{
+						libcnotify_printf(
+						 "%s: device identifier\t\t\t: 0x%08" PRIx32 "\n",
+						 function,
+						 inode->device_identifier );
 
 						libcnotify_printf(
 						 "\n" );
@@ -1131,6 +1171,114 @@ int libfsapfs_inode_get_group_identifier(
 	return( 1 );
 }
 
+/* Retrieves the device identifier
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsapfs_inode_get_device_identifier(
+     libfsapfs_inode_t *inode,
+     uint32_t *device_identifier,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_inode_get_device_identifier";
+
+	if( inode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
+		 function );
+
+		return( -1 );
+	}
+	if( device_identifier == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid major device identifier.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( ( inode->file_mode & 0xf000 ) == LIBFSAPFS_FILE_TYPE_CHARACTER_DEVICE )
+	 || ( ( inode->file_mode & 0xf000 ) == LIBFSAPFS_FILE_TYPE_BLOCK_DEVICE ) )
+	{
+		*device_identifier = inode->device_identifier;
+
+		return( 1 );
+	}
+	return( 0 );
+}
+
+/* Retrieves the device number
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsapfs_inode_get_device_number(
+     libfsapfs_inode_t *inode,
+     uint32_t *major_device_number,
+     uint32_t *minor_device_number,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_inode_get_device_number";
+	int result            = 0;
+
+	if( inode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
+		 function );
+
+		return( -1 );
+	}
+	if( major_device_number == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid major device number.",
+		 function );
+
+		return( -1 );
+	}
+	if( minor_device_number == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid minor device number.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( ( inode->file_mode & 0xf000 ) == LIBFSAPFS_FILE_TYPE_CHARACTER_DEVICE )
+	 || ( ( inode->file_mode & 0xf000 ) == LIBFSAPFS_FILE_TYPE_BLOCK_DEVICE ) )
+	{
+		if( ( inode->device_identifier & 0xffff0000UL ) == 0 )
+		{
+			*major_device_number = ( inode->device_identifier >> 8 ) & 0x000000ffUL;
+			*minor_device_number = inode->device_identifier & 0x000000ffUL;
+
+			result = 1;
+		}
+		else if( ( inode->device_identifier & 0x00ffff00UL ) == 0 )
+		{
+			*major_device_number = ( inode->device_identifier >> 24 ) & 0x000000ffUL;
+			*minor_device_number = inode->device_identifier & 0x000000ffUL;
+
+			result = 1;
+		}
+	}
+	return( result );
+}
+
 /* Retrieves the file mode
  * Returns 1 if successful or -1 on error
  */
@@ -1205,6 +1353,43 @@ int libfsapfs_inode_get_utf8_name_size(
 
 		return( -1 );
 	}
+	return( 1 );
+}
+
+/* Retrieves the number of (hard) links (or children of a directory)
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_inode_get_number_of_links(
+     libfsapfs_inode_t *inode,
+     uint32_t *number_of_links,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_inode_get_number_of_links";
+
+	if( inode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
+		 function );
+
+		return( -1 );
+	}
+	if( number_of_links == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid number of links.",
+		 function );
+
+		return( -1 );
+	}
+	*number_of_links = inode->number_of_links;
+
 	return( 1 );
 }
 

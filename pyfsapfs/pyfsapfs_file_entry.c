@@ -125,6 +125,13 @@ PyMethodDef pyfsapfs_file_entry_object_methods[] = {
 	  "\n"
 	  "Returns the added date and time as a 64-bit integer containing an APFS timestamp value." },
 
+	{ "get_number_of_links",
+	  (PyCFunction) pyfsapfs_file_entry_get_number_of_links,
+	  METH_NOARGS,
+	  "get_number_of_links() -> Integer\n"
+	  "\n"
+	  "Retrieves the number of (hard) links." },
+
 	{ "get_owner_identifier",
 	  (PyCFunction) pyfsapfs_file_entry_get_owner_identifier,
 	  METH_NOARGS,
@@ -138,6 +145,13 @@ PyMethodDef pyfsapfs_file_entry_object_methods[] = {
 	  "get_group_identifier() -> Integer\n"
 	  "\n"
 	  "Retrieves the group identifier." },
+
+	{ "get_device_number",
+	  (PyCFunction) pyfsapfs_file_entry_get_device_number,
+	  METH_NOARGS,
+	  "get_device_number() -> Tuple(Integer, Integer)\n"
+	  "\n"
+	  "Retrieves the device number." },
 
 	{ "get_file_mode",
 	  (PyCFunction) pyfsapfs_file_entry_get_file_mode,
@@ -327,6 +341,12 @@ PyGetSetDef pyfsapfs_file_entry_object_get_set_definitions[] = {
 	  "The added date and time.",
 	  NULL },
 
+	{ "number_of_links",
+	  (getter) pyfsapfs_file_entry_get_number_of_links,
+	  (setter) 0,
+	  "The number of (hard) links.",
+	  NULL },
+
 	{ "owner_identifier",
 	  (getter) pyfsapfs_file_entry_get_owner_identifier,
 	  (setter) 0,
@@ -337,6 +357,12 @@ PyGetSetDef pyfsapfs_file_entry_object_get_set_definitions[] = {
 	  (getter) pyfsapfs_file_entry_get_group_identifier,
 	  (setter) 0,
 	  "The group identifier.",
+	  NULL },
+
+	{ "device_number",
+	  (getter) pyfsapfs_file_entry_get_device_number,
+	  (setter) 0,
+	  "The device number.",
 	  NULL },
 
 	{ "file_mode",
@@ -1339,6 +1365,58 @@ PyObject *pyfsapfs_file_entry_get_added_time_as_integer(
 	return( integer_object );
 }
 
+/* Retrieves the number of (hard) links
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pyfsapfs_file_entry_get_number_of_links(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
+{
+	PyObject *integer_object = NULL;
+	libcerror_error_t *error = NULL;
+	static char *function    = "pyfsapfs_file_entry_get_number_of_links";
+	uint32_t number_of_links = 0;
+	int result               = 0;
+
+	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
+
+	if( pyfsapfs_file_entry == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libfsapfs_file_entry_get_number_of_links(
+	          pyfsapfs_file_entry->file_entry,
+	          &number_of_links,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pyfsapfs_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve number of (hard) links.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	integer_object = PyLong_FromUnsignedLong(
+	                  (unsigned long) number_of_links );
+
+	return( integer_object );
+}
+
 /* Retrieves the owner identifier
  * Returns a Python object if successful or NULL on error
  */
@@ -1441,6 +1519,113 @@ PyObject *pyfsapfs_file_entry_get_group_identifier(
 	                  (unsigned long) value_32bit );
 
 	return( integer_object );
+}
+
+/* Retrieves the device number
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pyfsapfs_file_entry_get_device_number(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
+{
+	PyObject *integer_object     = NULL;
+	PyObject *tuple_object       = NULL;
+	libcerror_error_t *error     = NULL;
+	static char *function        = "pyfsapfs_file_entry_get_device_number";
+	uint32_t major_device_number = 0;
+	uint32_t minor_device_number = 0;
+	int result                   = 0;
+
+	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
+
+	if( pyfsapfs_file_entry == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libfsapfs_file_entry_get_device_number(
+	          pyfsapfs_file_entry->file_entry,
+	          &major_device_number,
+	          &minor_device_number,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result == -1 )
+	{
+		pyfsapfs_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve device number.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	tuple_object = PyTuple_New(
+                        2 );
+
+#if PY_MAJOR_VERSION >= 3
+	integer_object = PyLong_FromLong(
+	                  (long) major_device_number );
+#else
+	integer_object = PyInt_FromLong(
+	                  (long) major_device_number );
+#endif
+	/* Tuple set item does not increment the reference count of the integer object
+	 */
+	if( PyTuple_SetItem(
+	     tuple_object,
+	     0,
+	     integer_object ) != 0 )
+	{
+		goto on_error;
+	}
+#if PY_MAJOR_VERSION >= 3
+	integer_object = PyLong_FromLong(
+	                  (long) minor_device_number );
+#else
+	integer_object = PyInt_FromLong(
+	                  (long) minor_device_number );
+#endif
+	/* Tuple set item does not increment the reference count of the integer object
+	 */
+	if( PyTuple_SetItem(
+	     tuple_object,
+	     1,
+	     integer_object ) != 0 )
+	{
+		goto on_error;
+	}
+	return( tuple_object );
+
+on_error:
+	if( integer_object != NULL )
+	{
+		Py_DecRef(
+		 (PyObject *) integer_object );
+	}
+	if( tuple_object != NULL )
+	{
+		Py_DecRef(
+		 (PyObject *) tuple_object );
+	}
+	return( NULL );
 }
 
 /* Retrieves the file mode

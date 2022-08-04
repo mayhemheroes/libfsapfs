@@ -67,9 +67,17 @@ struct libfsapfs_inode
 	 */
 	uint32_t group_identifier;
 
+	/* Device identifier
+	 */
+	uint32_t device_identifier;
+
 	/* The file mode
 	 */
 	uint16_t file_mode;
+
+	/* Number of (hard) links
+	 */
+	uint32_t number_of_links;
 
 	/* The name size
 	 */
@@ -152,9 +160,25 @@ int libfsapfs_inode_get_group_identifier(
      uint32_t *group_identifier,
      libcerror_error_t **error );
 
+int libfsapfs_inode_get_device_identifier(
+     libfsapfs_inode_t *inode,
+     uint32_t *device_identifier,
+     libcerror_error_t **error );
+
+int libfsapfs_inode_get_device_number(
+     libfsapfs_inode_t *inode,
+     uint32_t *major_device_number,
+     uint32_t *minor_device_number,
+     libcerror_error_t **error );
+
 int libfsapfs_inode_get_file_mode(
      libfsapfs_inode_t *inode,
      uint16_t *file_mode,
+     libcerror_error_t **error );
+
+int libfsapfs_inode_get_number_of_links(
+     libfsapfs_inode_t *inode,
+     uint32_t *number_of_links,
      libcerror_error_t **error );
 
 int libfsapfs_inode_get_utf8_name_size(

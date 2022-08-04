@@ -110,11 +110,19 @@ PyObject *pyfsapfs_file_entry_get_added_time_as_integer(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments );
 
+PyObject *pyfsapfs_file_entry_get_number_of_links(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments );
+
 PyObject *pyfsapfs_file_entry_get_owner_identifier(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments );
 
 PyObject *pyfsapfs_file_entry_get_group_identifier(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments );
+
+PyObject *pyfsapfs_file_entry_get_device_number(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments );
 

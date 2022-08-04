@@ -57,6 +57,7 @@ in the section entitled "GNU Free Documentation License".
 | 0.0.10 | J.B. Metz | June 2021 | Textual corrections.
 | 0.0.11 | J.B. Metz | July 2021 | Additional format information regarding extended attributes.
 | 0.0.12 | J.B. Metz | April 2022 | Additional format information.
+| 0.0.13 | J.B. Metz | July 2022 | Additional information about device identifier.
 |===
 
 :numbered:
@@ -1660,7 +1661,7 @@ Signed integer that contains the number of nanoseconds since January 1, 1970 00:
 Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
 | 56 | 8 | | Inode flags (internal_flags) +
 See section: <<inode_flags,Inode flags>>
-| 64 | 4 | | Number of children (nchildren) or number of links (nlink)
+| 64 | 4 | | Number of children (nchildren) or number of (hard) links (nlink)
 | 68 | 4 | | [yellow-background]*Unknown (default_protection_class)*
 | 72 | 4 | | [yellow-background]*Unknown (write_generation_counter)*
 | 76 | 4 | | BSD file entry flags (bsd_flags) +
@@ -1674,6 +1675,9 @@ See section: <<file_modes,File modes>>
 | 98 | ... | | Extended fields (xfields) +
 See section: <<extended_fields,Extended fields>>
 |===
+
+[NOTE]
+The MacOS stat command treats nchildren equivalent to nlink
 
 ===== [[inode_flags]]Inode flags
 
@@ -2299,8 +2303,8 @@ The extended field data contains a 128-bit UUID value
 | 12 | INO_EXT_TYPE_RESERVED_12 | [yellow-background]*Unknown (Reserved)*
 | 13 | INO_EXT_TYPE_SPARSE_BYTES | Number of sparse bytes in the data stream +
 The extended field data contains a 64-bit integer value
-| 14 | INO_EXT_TYPE_RDEV | Block- or character-device identifier +
-The extended field data contains a 32-bit integer value
+| 14 | INO_EXT_TYPE_RDEV | Block or character device identifier +
+The extended field data contains a 32-bit integer value with <<device_identifier,Device identifier>>
 | 15 | INO_EXT_TYPE_PURGEABLE_FLAGS | Information about a purgeable file +
 [yellow-background]*Unknown (Reserved), seen 8 byte value*
 | 16 | INO_EXT_TYPE_ORIG_SYNC_ROOT_ID | [yellow-background]*Unknown (Inode number of the sync-root hierarchy)*
@@ -2319,6 +2323,61 @@ The extended field data contains a 32-bit integer value
 | 0x20 | XF_SYSTEM_FIELD | Extended field was added by the system (kernel)
 | 0x40 | XF_RESERVED_40 | [yellow-background]*Unknown (Reserved)*
 | 0x80 | XF_RESERVED_80 | [yellow-background]*Unknown (Reserved)*
+|===
+
+==== [[device_identifier]]Device identifier
+
+The device identifier can be stored in different formats, such as: native,
+386bsd, 4bsd, bsdos, freebsd, hpux, isc, linux, netbsd, osf1, sco, solaris,
+sunos, svr3, svr4 and ultrix.
+
+The "native" and "hpux" device identifier is 4 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 1 | | Major device number
+| 1 | 2 | 0 | [yellow-background]*Unknown*
+| 3 | 1 | | Minor device number
+|===
+
+The "386bsd", "4bsd", "freebsd", "isc", "linux", "netbsd", "sco", "sunos",
+"svr3" and "ultrix" device identifier is 4 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 2 | 0 | [yellow-background]*Unknown*
+| 2 | 1 | | Major device number
+| 3 | 1 | | Minor device number
+|===
+
+The "solaris" and "svr4" device identifier is 4 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0.0 | 18 bits | | Minor device number
+| 2.2 | 14 bits | | Major device number
+|===
+
+The "bsdos" and "osf1" device identifier is 4 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0.0 | 20 bits | | Minor device number
+| 2.4 | 12 bits | | Major device number
+|===
+
+The "bsdos" alternative device identifier is 4 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0.0 | 8 bits | | Sub unit number
+| 1.0 | 12 bits | | Unit number
+| 2.4 | 12 bits | | Major device number
 |===
 
 === [[data_stream_attribute]]Data stream attribute
