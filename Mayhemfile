@@ -1,0 +1,7 @@
+project: libfsapfs
+target: fsapfsinfo
+testsuite:
+  - file://tests/data
+
+cmds:
+  - cmd: /install/bin/fsapfsinfo @@
