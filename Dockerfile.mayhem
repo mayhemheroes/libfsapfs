@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 ubuntu:22.04 as builder
+FROM --platform=linux/amd64 ubuntu:22.04 AS builder
 
 RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential automake pkg-config autopoint libtool git
@@ -6,10 +6,20 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential automake p
 COPY . /repo
 WORKDIR /repo
 RUN ./synclibs.sh
+# libfdata removed tree support after 2023-01-09; restore tree source files and types from the last compatible commit
+RUN git clone https://github.com/libyal/libfdata.git /tmp/libfdata_pin \
+ && git -C /tmp/libfdata_pin checkout 00415bd7b8b98e41c38adf591d18cd73f522da1d \
+ && cp /tmp/libfdata_pin/libfdata/libfdata_tree.c \
+       /tmp/libfdata_pin/libfdata/libfdata_tree.h \
+       /tmp/libfdata_pin/libfdata/libfdata_tree_node.c \
+       /tmp/libfdata_pin/libfdata/libfdata_tree_node.h \
+       /tmp/libfdata_pin/libfdata/libfdata_types.h \
+       /repo/libfdata/ \
+ && rm -rf /tmp/libfdata_pin
 RUN ./autogen.sh
 RUN ./configure --prefix=/install
 RUN make -j8
 RUN make install
 
-FROM ubuntu:22.04 as package
+FROM ubuntu:22.04 AS package
 COPY --from=builder /install /install
